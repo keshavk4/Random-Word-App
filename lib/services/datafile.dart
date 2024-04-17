@@ -9,10 +9,10 @@ import 'package:path/path.dart';
 
 // To load data from the API
 Future<List> loadDataFromAPI() async {
-  Uri uri = Uri.parse("https://random-words-api.vercel.app/word");
+  Uri uri = Uri.parse("https://random-word-api-xi.vercel.app/word");
   var response = await http.get(uri);
   dynamic data = jsonDecode(response.body);
-  return [data[0]["word"], data[0]["definition"], data[0]["pronunciation"]];
+  return [data["word"], data["definition"], data["pronunciation"]];
 }
 
 class NoteDatabase {
