@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:random_word/services/datafile.dart';
 import 'package:random_word/services/mappingfile.dart';
 
 class WordListPage extends StatefulWidget {
-  const WordListPage({Key? key, required this.title}) : super(key: key);
+  const WordListPage({super.key, required this.title});
 
   final String title;
 
   @override
-  _WordListPageState createState() => _WordListPageState();
+  State<WordListPage> createState() => _WordListPageState();
 }
 
 class _WordListPageState extends State<WordListPage> {
@@ -23,10 +24,10 @@ class _WordListPageState extends State<WordListPage> {
 
   // This method will fetch data from the database and update the variable _wordList
   Future<void> _listData() async {
-    List<WordClass> _tempWordList = await NoteDatabase.selectDataFromDatabase();
+    List<WordClass> tempWordList = await NoteDatabase.selectDataFromDatabase();
     setState(() {
       _isLoading = true;
-      _wordList = _tempWordList;
+      _wordList = tempWordList;
       _isLoading = false;
     });
   }
@@ -38,6 +39,23 @@ class _WordListPageState extends State<WordListPage> {
       appBar: AppBar(
         title: Text(widget.title),
         centerTitle: true,
+        shadowColor: Theme.of(context).colorScheme.shadow,
+        systemOverlayStyle:
+            const SystemUiOverlayStyle(statusBarColor: Colors.black26),
+        foregroundColor: Colors.white,
+        elevation: 4,
+        shape: ShapeBorder.lerp(
+          const RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20))),
+          const RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20))),
+          10,
+        ),
+        backgroundColor: Colors.blueAccent,
       ),
       body: _isLoading
           ? const Center(
@@ -47,8 +65,7 @@ class _WordListPageState extends State<WordListPage> {
             )
           : Scrollbar(
               thickness: 5,
-              hoverThickness: 5,
-              showTrackOnHover: true,
+              trackVisibility: true,
               child: ListView.separated(
                 padding: const EdgeInsets.all(10),
                 itemCount: _wordList.length,

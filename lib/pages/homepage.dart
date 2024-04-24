@@ -1,20 +1,18 @@
 import 'dart:async';
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:random_word/services/datafile.dart';
 import 'package:random_word/pages/listpage.dart';
 import 'package:random_word/services/mappingfile.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key, required this.title}) : super(key: key);
+  const HomePage({super.key, required this.title});
 
   final String title;
 
   @override
-  _HomePageState createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
@@ -52,7 +50,7 @@ class _HomePageState extends State<HomePage> {
       _pronunciation = prefs.getString("pronunciation") ?? "";
       if (_word != "") {
         _lastDateTime = DateTime.parse(prefs.getString("date") ?? "");
-        }
+      }
     });
     if (_word == "") _updateData();
   }
@@ -70,34 +68,31 @@ class _HomePageState extends State<HomePage> {
 
   // This method will call loadDataFromAPI() to load data from the api and update the values of variable
   void _updateData() {
+    setState(() {
+      _isLoading = true;
+    });
+    loadDataFromAPI().then((value) {
       setState(() {
-        _isLoading = true;
+        _word = value[0];
+        _definition = value[1];
+        _pronunciation = value[2];
       });
-      loadDataFromAPI().then((value) {
-        setState(() {
-          _word = value[0];
-          _definition = value[1];
-          _pronunciation = value[2];
-        });
-        _insertData();
-        _setPreferences();
-        setState(() {
-          _isLoading = false;
-        });
-      }).catchError((onError) {
-        Fluttertoast.showToast(
-        msg: "Can't Connect to The Server",
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIosWeb: 5,
-        backgroundColor: Colors.black,
-        textColor: Colors.white,
-        fontSize: 16,
-      );
+      _insertData();
+      _setPreferences();
+    }).catchError((onError) {
+      setState(() {
+        _word = "Error";
+        _definition = "Something went wrong";
+        _pronunciation = "Please try again later";
       });
+    }).whenComplete(() {
+      setState(() {
+        _isLoading = false;
+      });
+    });
   }
 
-  // To insert variables data into the database 
+  // To insert variables data into the database
   Future<void> _insertData() async {
     WordClass wordClass = WordClass(
         word: _word, definition: _definition, pronunciation: _pronunciation);
@@ -111,6 +106,23 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text(widget.title),
         centerTitle: true,
+        shadowColor: Theme.of(context).colorScheme.shadow,
+        systemOverlayStyle:
+            const SystemUiOverlayStyle(statusBarColor: Colors.black26),
+        foregroundColor: Colors.white,
+        elevation: 4,
+        shape: ShapeBorder.lerp(
+          const RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20))),
+          const RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20))),
+          10,
+        ),
+        backgroundColor: Colors.blueAccent,
       ),
       body: _isLoading
           ? const Center(
@@ -192,8 +204,8 @@ class _HomePageState extends State<HomePage> {
             context,
             MaterialPageRoute(
                 builder: (context) => const WordListPage(title: "History"))),
-        child: const Icon(Icons.list),
         tooltip: "History",
+        child: const Icon(Icons.list),
       ),
     );
   }
